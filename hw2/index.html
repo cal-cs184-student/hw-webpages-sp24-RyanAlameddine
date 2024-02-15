@@ -151,7 +151,7 @@
   Briefly explain how you implemented the area-weighted vertex normals.
 </b>
 <p>
-    YOUR RESPONSE GOES HERE
+    Basically, I first used the half-edge datastructure to iterate over all adjacent verticies of the target vertex. At each adjacent vertex, I took the cross product of that vertex and the previous vertex visited. This provides a (non unit) normal vector for the corresponding face containing those verticies. The magnitude of this vector is twice the area of the face. I take the sum of all of these normal vectors and then normalize it to unit length. This is equivalent to an area weighted-average because the factor of 2 cancels out.
 </p>
 <br>
 
@@ -159,10 +159,22 @@
 <b>
   Show screenshots of dae/teapot.dae (not .bez) comparing teapot shading with and without vertex normals. Use <kbd>Q</kbd> to toggle default flat shading and Phong shading.
 </b>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/flat.png" align="middle" width="400px"/>
+        <figcaption>Flat</figcaption>
+      </td>
+      <td>
+        <img src="images/smooth.png" align="middle" width="400px"/>
+        <figcaption>Smooth</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <br>
+
 
 
 <h3 align="middle">Part 4: Edge Flip</h3>
@@ -170,7 +182,14 @@
   Briefly explain how you implemented the edge flip operation and describe any interesting implementation / debugging tricks you have used.
 </b>
 <p>
-    YOUR RESPONSE GOES HERE
+  Basically, I implemented edge flipping in a very straightforward way. I first created variables for every single half-edge, vertex, and face present.
+  Then, I conceptually though of "rotating" the edge bc onto ad. I then called setNeighbors on all the half-edges in the relevant two faces, manually selecting the next, twin, and face entries to match the new triangles (edges didnt change).
+
+  Next, I set the halfedge for each face to the two sides of the new ad/da edge.
+
+  Finally, I set the halfedges for the verticies b and c (because their halfedges might have been removed).
+  
+  Fortunately, I didn't run into any trouble while debugging!
 </p>
 <br>
 
@@ -178,9 +197,21 @@
 <b>
   Show screenshots of the teapot before and after some edge flips.
 </b>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/unflip.png" align="middle" width="400px"/>
+        <figcaption>Original</figcaption>
+      </td>
+      <td>
+        <img src="images/flip.png" align="middle" width="400px"/>
+        <figcaption>Flipped</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <br>
 
 
@@ -188,7 +219,7 @@
     Write about your eventful debugging journey, if you have experienced one.
 </b>
 <p>
-    YOUR RESPONSE GOES HERE
+  Fortunately, I didn't run into any trouble while debugging!
 </p>
 <br>
 
