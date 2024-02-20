@@ -49,7 +49,15 @@
 
 <h2 align="middle">Overview</h2>
 <p>
-    YOUR RESPONSE GOES HERE TODO
+    In this homework, I implemented a variety of different geometric modeling techniques and algorithms. 
+    
+    Starting off, I implemented bezier curves and surfaces using de Casteljau's algorithm. These basically involve taking a list of control points and recursively lerping between these points to resolve different points on the curves. 
+    
+    Next, I began working with the half-edge datastructure to implement geometric modeling functions. This involved implementing both area-weighted vertex normals to have vertex-wise smooth shading, and implementing a variety of mesh editing functions. These functions, like split, flip, and subdivide, took advantage of the half-edge data structure to implement efficient modification of gemoetry. For example, I used the split and flip logic inside my subdivision logic to avoid directly modifying halfedge pointers. 
+
+    For me, the most interesting thing I learned was how powerful the half edge datastructure is. I have worked with some 3d modeling software before (like blender), but I never had any clue how the internal mesh traversal logic worked! Even while implementing this assignment, I had a lot of ideas on how I could implement other complex mesh editing features using the halfedge structure (for example, I think implementing loop selection is pretty trivial with this structure).
+
+    The other thing I found really interesting was contrasting the bezier surfaces to mesh-based modeling. I had never interacted with non-mesh based modeling before, so exposure to new ways to think about models was really cool!
 </p>
 <br>
 
@@ -183,7 +191,7 @@
 </b>
 <p>
   Basically, I implemented edge flipping in a very straightforward way. I first created variables for every single half-edge, vertex, and face present.
-  Then, I conceptually though of "rotating" the edge bc onto ad. I then called setNeighbors on all the half-edges in the relevant two faces, manually selecting the next, twin, and face entries to match the new triangles (edges didnt change).
+  Then, I conceptually thought of "rotating" the edge bc onto ad. I then called setNeighbors on all the half-edges in the relevant two faces, manually selecting the next, twin, and face entries to match the new triangles (edges didnt change).
 
   Next, I set the halfedge for each face to the two sides of the new ad/da edge.
 
@@ -229,7 +237,11 @@
   Briefly explain how you implemented the edge split operation and describe any interesting implementation / debugging tricks you have used.
 </b>
 <p>
-    YOUR RESPONSE GOES HERE
+  Basically, I implemented edge splitting using a similar approach to how I implemented edge flipping. I first created variables for every single half-edge, vertex, and face present. This includes the 6 new half edges, 3 new edges, 2 new faces, and 1 new vertex.
+  Then, I conceptually thought pulling up the bc edge to mc, and linking the rest of the edges/verticies accordingly. I called setNeighbors on all the half-edges in the relevant faces, manually selecting the next, twin, and face entries to match the new triangles. I also initialized all the new edges and set the faces' halfedge pointers to a relevant halfedge. Finally, I set the halfedge of the new vertex and set it's position to the average position between b and c.
+
+  I didn't need to use any interesting tricks to get this working because I structured things in a pretty straightforward way.
+  
 </p>
 <br>
 
@@ -237,18 +249,40 @@
 <b>
     Show screenshots of a mesh before and after some edge splits. 
 </b>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/nochange.png" align="middle" width="400px"/>
+        <figcaption>Original</figcaption>
+      </td>
+      <td>
+        <img src="images/split.png" align="middle" width="400px"/>
+        <figcaption>Split</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <br>
 
 
 <b>
     Show screenshots of a mesh before and after a combination of both edge splits and edge flips.
 </b>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/nochange.png" align="middle" width="400px"/>
+        <figcaption>Original</figcaption>
+      </td>
+      <td>
+        <img src="images/splitandflip.png" align="middle" width="400px"/>
+        <figcaption>Split and Flip</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <br>
 
 
@@ -256,7 +290,7 @@
     Write about your eventful debugging journey, if you have experienced one.
 </b>
 <p>
-    YOUR RESPONSE GOES HERE
+    Fortunately, no issues with debugging once again!
 </p>
 <br>
 
@@ -275,7 +309,21 @@
   Briefly explain how you implemented the loop subdivision and describe any interesting implementation / debugging tricks you have used.
 </b>
 <p>
-    YOUR RESPONSE GOES HERE
+    My loop subdivision implementation broken down into the following steps:
+
+    1) First, I iterate through each edge. For each edge, I store $(3.0/8.0 * (a + b)+ 1.0/8.0 * (c + d))$ into the edge's newPosition value. a, b, c, and d are simply the positions of the corresponding verticies (the edge is AB, and the verticies of the adjacent triangles are C and D). This value will later correspond to the new split vertex position.
+
+    2) Next, I iterate through all the verticies. For each vertex, I find n and calculate u. Then, I find all neighboring verticies by traversing the halfedge twin->next pairs and sum up their verticies' positions. I set the relevant vertex's new position to $(1 - n * u) * v->position + u * sum$. This is where this vertex will be moved after the splits and flips.
+
+    3) For each original edge, I split the edge. Inside split, when the new vertex is created, I set that vertex's newPosition to be the edge's newPosition.
+
+    4) For each new edge which connects one new and one old vertex, I flip that edge.
+    
+    5) For each vertex, set its position to its newPosition. 
+
+    An implementation trick I used was that, in step (1), I also build up a vector of all edges. This way, it is very easy in step (3) for me to iterate through all old edges, without the iterator hitting any newly created verticies from the splits.
+
+    Fortunately, I didn't run into any debugging issues, my code worked first try!
 </p>
 <br>
 
@@ -283,8 +331,34 @@
 <b>
   Take some notes, as well as some screenshots, of your observations on how meshes behave after loop subdivision. What happens to sharp corners and edges? Can you reduce this effect by pre-splitting some edges?
 </b>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/cuberaw.png" align="middle" width="400px"/>
+        <figcaption>Original</figcaption>
+      </td>
+      <td>
+        <img src="images/cubesub.png" align="middle" width="400px"/>
+        <figcaption>Subdivided</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/cubsplit.png" align="middle" width="400px"/>
+        <figcaption>Split</figcaption>
+      </td>
+      <td>
+        <img src="images/cubesplitsub.png" align="middle" width="400px"/>
+        <figcaption>Split then Subdivided</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <p>
-    YOUR RESPONSE GOES HERE
+    After loop subdivision, sharp edges get very pulled in and rounded. As you can see, the sharp edges of the cube above get pulled into an almost spherical shape. However, if I pre-split many of the edges around the top face, then the sharpness is much more preserved. 
+    
+    One explanation for this is that, when I split the top and surrounding faces, all the new geometry is placed onto the plane of the existing face (it is not blended with adjacent elements like the subdivision). Thus, when we subdivide, there is far more geometry on this plane, so when we are calculating new positions off of nearby verticies' positions, we have far more geometry which stays up on the original plane.
 </p>
 <br>
 
@@ -292,9 +366,62 @@
 <b>
   Load dae/cube.dae. Perform several iterations of loop subdivision on the cube. Notice that the cube becomes slightly asymmetric after repeated subdivisions. Can you pre-process the cube with edge flips and splits so that the cube subdivides symmetrically? Document these effects and explain why they occur. Also explain how your pre-processing helps alleviate the effects.
 </b>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/cube0.png" align="middle" width="400px"/>
+        <figcaption>Original</figcaption>
+      </td>
+      <td>
+        <img src="images/cube1.png" align="middle" width="400px"/>
+        <figcaption>Subdivided once</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/cube2.png" align="middle" width="400px"/>
+        <figcaption>Subdivided twice</figcaption>
+      </td>
+      <td>
+        <img src="images/cube3.png" align="middle" width="400px"/>
+        <figcaption>Subdivided three times</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <p>
-    YOUR RESPONSE GOES HERE
+
+    As you can see above, the cube is subdivided asymmetrically. For example, we can see that the top left and bottom right verticies in the above example get pulled into the center more than the top right and bottom left verticies. This is due to the asymmetry in differening sets of adjacent verticies in the triangulated cube. 
+    
+    For example, there are 5 adjacent verticies to the top left vertex (top right, bottom left, bottom right, back top left, back bottom right), which are all blended in to find the corresponding vertex position. Note that there are 3 bottom verticies and two top ones, so the point is pulled down. Alternatively, the top right vertex is adjacent to 3 top verticies and two bottom ones, so ends up higher.
 </p>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/cube20.png" align="middle" width="400px"/>
+        <figcaption>Original with splits</figcaption>
+      </td>
+      <td>
+        <img src="images/cube21.png" align="middle" width="400px"/>
+        <figcaption>Subdivided once</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/cube22.png" align="middle" width="400px"/>
+        <figcaption>Subdivided twice</figcaption>
+      </td>
+      <td>
+        <img src="images/cube23.png" align="middle" width="400px"/>
+        <figcaption>Subdivided three times</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>To resolve this asymmetry, I split the diagonal of each face in the cube. This way, each vertex degree is the same, and the geometry is symmetrical. Thus, as you can see, the cube subdivides symmetrically with these changes. This is due to the fact that the geometry of the cube has the same axes of symmetry as the cube, so the subdivision preserves those symmetries.</p>
 <br>
 
 
