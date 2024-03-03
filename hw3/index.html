@@ -149,7 +149,11 @@ Compare rendering times on a few scenes with moderately complex geometries with 
   Walk through your BVH construction algorithm. Explain the heuristic you chose for picking the splitting point.
 </h3>
 <p>
-    YOUR RESPONSE GOES HERE
+    My BVH construction algorithm is pretty simple. First, I iterate through each primitive within this node. Using this iteration, I collect two things: 1) I expand the node's bounding box using the primitive's bounding box, and 2) I add the centroid of the primitive to an accumulator. Once iteration is complete, I divide the accumulator by the number of elements visited to obtain the average of all the centroids. Next, there are two cases:
+
+	If the primitive count is less than or equal to max_leaf_size, then we are done.
+
+	Otherwise, we want to split the node again. To do this, I use the following heuristic. I consider the bounding box of this node. Depending on if the width(x), height(y), or length(z) is biggest, I select a normal vector for the splitting plane to be (1, 0, 0), (0, 1, 0), or (0, 0, 1) respectively. Thus, the splitting plane is defined by this vector and the average centroid computed above. I then iterate through each primitive, adding it to a collection of left and right elements depending on whether $(p - c)\cdot n < 0$ (p is the primitive's centroid, c is the average centroid, and n is the normal vector of the split plane).
 </p>
 
 <h3>
@@ -160,22 +164,22 @@ Compare rendering times on a few scenes with moderately complex geometries with 
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example1.dae</figcaption>
+        <img src="images/CBlucy.png" align="middle" width="400px"/>
+        <figcaption>CBlucy.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example2.dae</figcaption>
+        <img src="images/maxplanck.png" align="middle" width="400px"/>
+        <figcaption>maxplanck.dae</figcaption>
       </td>
     </tr>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example3.dae</figcaption>
+        <img src="images/CBDragon.png" align="middle" width="400px"/>
+        <figcaption>CBDragon.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example4.dae</figcaption>
+        <img src="images/beast.png" align="middle" width="400px"/>
+        <figcaption>beast.dae</figcaption>
       </td>
     </tr>
   </table>
@@ -186,7 +190,7 @@ Compare rendering times on a few scenes with moderately complex geometries with 
   Compare rendering times on a few scenes with moderately complex geometries with and without BVH acceleration. Present your results in a one-paragraph analysis.
 </h3>
 <p>
-    YOUR RESPONSE GOES HERE
+	Rendering bunny.dae took $.8027 s$ with BVH and $271.7064s$ without. bench.dae took $.8518$ with BVH and $621.2544s$ without. This is multiple orders of magnitude different. This shows how optimizations and accelleration like BVH trees are not just nice additions, but are basically required for any practical ray tracing system with a non-trivial number of primitives.
 </p>
 <br>
 
@@ -200,7 +204,18 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
   Walk through both implementations of the direct lighting function.
 </h3>
 <p>
-    YOUR RESPONSE GOES HERE
+	In each of these functions, I attempt to estimate the direct lighting on a particular point by taking a set of samples. This point is the scene intersection of a camera ray.
+
+    Hemisphere:
+	I sample a set of directions in a hemisphere around the point. For each sample, I cast a ray from the intersection point in the sampled direction. If it hits an emissive entity (with emission L), I calculate it's contribution to L_out using the reflection equation: $L * bsdf(w_out, w_in) * dot(n, win) * 2*pi$. Note that n is the surface normal and win is w_in in world space. The $2*pi$ term is division by the pdf $1/2pi$, which is required for the monte carlo estimator to be unbiased ($1/2pi$ is the pdf).
+
+	I then return the average of all those samples, plus any emission from the surface itself.
+
+	Importance:
+	For each light in the scene, I sample $ns_area_light$ samples times (or once if it's a point light). I sample from the light itself. I then cast a ray from the hit point to the sampled light direction. If it hits anything, I ignore this sample. If it doesn't, I add the light's contribution to the reflection using the reflection equation $L * bsdf(w_out, w_in) * dot(n, win) /pdf$. Note that this time the pdf is simply divided by directly because pdf is set by the light sampler.
+
+	The samples are combined by averaging.
+	I return the average of all those samples, plus any emission from the surface itself.
 </p>
 
 <h3>
@@ -221,23 +236,23 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
     <br>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example1.dae</figcaption>
+        <img src="images/bunny_64_32_H.png" align="middle" width="400px"/>
+        <figcaption>CBunny.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example1.dae</figcaption>
+        <img src="images/bunny_64_32.png" align="middle" width="400px"/>
+        <figcaption>CBunny.dae</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example2.dae</figcaption>
+        <img src="images/CBspheres_H.png" align="middle" width="400px"/>
+        <figcaption>CBspheres.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example2.dae</figcaption>
+        <img src="images/CBspheres2.png" align="middle" width="400px"/>
+        <figcaption>CBspheres.dae</figcaption>
       </td>
     </tr>
     <br>
@@ -253,28 +268,28 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="200px"/>
-        <figcaption>1 Light Ray (example1.dae)</figcaption>
+        <img src="images/bunny_64_32_1.png" align="middle" width="200px"/>
+        <figcaption>1 Light Ray (CBbunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="200px"/>
-        <figcaption>4 Light Rays (example1.dae)</figcaption>
+        <img src="images/bunny_64_32_4.png" align="middle" width="200px"/>
+        <figcaption>4 Light Rays (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="200px"/>
-        <figcaption>16 Light Rays (example1.dae)</figcaption>
+        <img src="images/bunny_64_32_16.png" align="middle" width="200px"/>
+        <figcaption>16 Light Rays (CBbunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="200px"/>
-        <figcaption>64 Light Rays (example1.dae)</figcaption>
+        <img src="images/bunny_64_32_64.png" align="middle" width="200px"/>
+        <figcaption>64 Light Rays (CBbunny.dae)</figcaption>
       </td>
     </tr>
   </table>
 </div>
 <p>
-    YOUR EXPLANATION GOES HERE
+    While there is still noise in the shadow of the 64 light ray image, there is a clear decrease in the amount of noise in the smooth shadow as the light ray count increases. This is due to the fact that, at points along the edge of the shadow, the importance sampling function is going to assign high probabilities to directions which are actually occluded from the light source, causing noise to increase.
 </p>
 <br>
 
@@ -282,7 +297,7 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
   Compare the results between uniform hemisphere sampling and lighting sampling in a one-paragraph analysis.
 </h3>
 <p>
-    YOUR RESPONSE GOES HERE
+    Uniform hemisphere sampling has much more noise that lighting sampling in the above examples. While it is technically possible that lighting sampling can be more noisy (in particular this would be the case if the importance sampling functions were not good, and preferred sampling from low-light areas). However, this was not the case in the example scenes which I showed in the first section, so the noise lowered significantly. This is due to the fact that we are not sampling a ton of samples which don't contribute to the lightness because they don't go anywhere near lights.
 </p>
 <br>
 
