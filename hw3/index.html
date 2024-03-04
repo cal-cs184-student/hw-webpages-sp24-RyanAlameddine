@@ -53,38 +53,31 @@
   <table style="width=100%">
       <tr>
           <td align="middle">
-          <img src="images/example_image.png" width="480px" />
+          <img src="images/bunny_adapt.png" width="480px" />
           <figcaption align="middle">Results Caption: my bunny is the bounciest bunny</figcaption>
       </tr>
   </table>
 </div>
 
-<p>All of the text in your write-up should be <em>in your own words</em>. If you need to add additional HTML features to this document, you can search the <a href="http://www.w3schools.com/">http://www.w3schools.com/</a> website for instructions. To edit the HTML, you can just copy and paste existing chunks and fill in the text and image file names appropriately.</p>
-<o>The website writeup is intended to be a self-contained walkthrough of the assignment: we want this to be a piece of work which showcases your understanding of relevant concepts through both mesh images as well as written explanations about what you did to complete each part of the assignment. Try to be as clear and organized as possible when writing about your own output files or extensions to the assignment. We want to understand what you've achieved and how you've done it!</p> 
-<p>If you are well-versed in web development, feel free to ditch this template and make a better looking page.</p>
-
-
-<p>Here are a few problems students have encountered in the past. Test your website on the instructional machines early!</p>
-<ul>
-<li>Your main report page should be called index.html.</li>
-<li>Be sure to include and turn in all of the other files (such as images) that are linked in your report!</li>
-<li>Use only <em>relative</em> paths to files, such as <pre>"./images/image.jpg"</pre>
-Do <em>NOT</em> use absolute paths, such as <pre>"/Users/student/Desktop/image.jpg"</pre></li>
-<li>Pay close attention to your filename extensions. Remember that on UNIX systems (such as the instructional machines), capitalization matters. <pre>.png != .jpeg != .jpg != .JPG</pre></li>
-<li>Be sure to adjust the permissions on your files so that they are world readable. For more information on this please see this tutorial: <a href="http://www.grymoire.com/Unix/Permissions.html">http://www.grymoire.com/Unix/Permissions.html</a></li>
-<li>And again, test your website on the instructional machines early!</li>
-</ul>
-
-
-<p>Here is an example of how to include a simple formula:</p>
-<p align="middle"><pre align="middle">a^2 + b^2 = c^2</pre></p>
-<p>or, alternatively, you can include an SVG image of a LaTex formula.</p>
 
 <div>
 
 <h2 align="middle">Overview</h2>
 <p>
-    YOUR RESPONSE GOES HERE \TODO
+    In this project, I implemented a path tracing renderer with a variety of optimizations.
+	
+	I started off by implementing the primitive operations required for raytracing. This includes generating camera rays, and functions which find intersections between primitives (like triangles and spheres) and rays. At this point, ray tracing to generate an image was incredibly slow because it required testing intersection of every single ray with every single object. 
+	
+	Next, I implemented the first optimization, the BVH accelleration structure. I constructed a binary tree which partitions the primitives in the scene according to a heuristic I designed. This allows ray-scene intersection tests to be logarithmic in # of objects, not linear. This is because intersection can be calculated by first traversing the tree node bounding boxes which intersect, and only intersecting the ray with the primitives at the leaves.
+
+	Equipped with this optimization, I implementation the foundataions for global illumination. I implemented a simple diffuse bsdf which scatters light uniformly across it's hemisphere. Next, I implemented zero-bounce lighting and direct lighting (which sends rays out from scene intersection points to check if that surface should have lighting). First I implemented hemisphere sampling for the bounces, but this caused a lot of noise with low sample counts because most rays would just bounce into nothingness or a non-emissive object. Next, I implemented importance sampling, which sampled directly from the directions which were more likely to hit lights instead. 
+
+
+	Equipped with these tools, I implemented global illumination which is a combination of everything up to this point. Basically, I generate camera rays and intersect them with the scene. If they hit something, they have a chance to bounce again. This happens recursively until the ray misses or a coin flip fails. Each time, we accumulate light which has been building up according to the reflection equation. The final value contributes a sample to the pixel.
+
+	Finally, I implemented adaptive sampling, which allowed the pixel sample rate to automatically adjust depending on if we thought the pixel had converged. This sped up renders while allowing for high sampling rate at difficult sections of the image.
+
+	In the process of implementing this project, I didn't run into too many issues. The most difficult issues had to do with lighting (images were too bright or too dark in certain sections). By carefully tracing different bounces, I was able to identify that my diffuse BSDF was not correctly normalized, and I was double counting emission on bounces. Other than this, the project went pretty smooth!
 </p>
 <br>
 
@@ -358,10 +351,6 @@ You will probably want to use the instructional machines for the above renders i
   </table>
 </div>
 <br>
-<p>
-    YOUR EXPLANATION GOES HERE
-</p>
-<br>
 
 <h3>
   For CBbunny.dae, compare rendered views with max_ray_depth set to 0, 1, 2, 3, and 100 (the -m flag). Use 1024 samples per pixel.
@@ -399,7 +388,9 @@ You will probably want to use the instructional machines for the above renders i
 </div>
 <br>
 <p>
-    YOUR EXPLANATION GOES HERE
+    At 0, we just see the emission plane.
+	At 1, we see the all direct lighting.
+	After 1, most of the images look very similar (due to the falloff of light intensity after multiple bounces) with nice ambient lighting.
 </p>
 <br>
 
@@ -449,7 +440,7 @@ You will probably want to use the instructional machines for the above renders i
 </div>
 <br>
 <p>
-    YOUR EXPLANATION GOES HERE
+    As we can see, as the number of samples per pixel increases, the noise falls off pretty smoothly but slowly.
 </p>
 <br>
 
@@ -462,7 +453,11 @@ Pick one scene and render it with at least 2048 samples per pixel. Show a good s
   Explain adaptive sampling. Walk through your implementation of the adaptive sampling.
 </h3>
 <p>
-    YOUR RESPONSE GOES HERE
+    Before adaptive sampling, when generating an image with the pathtracing algorithm, I would generate a uniform number of samples per pixel. I would run the light bouncing algorithm for each sample, and average the result. However, there is an unfortunate trade off here. For some samples in easy parts of the image, the samples converge to the true mean very quickly, so the rest of the samples taken are unneccessarily wasting computation time. However, for complex areas of the scene, we might not have enough samples to eliminate most noise. This means we have to choose between wasting computation time and noise (defined by the section of the image which has the most noise we have to worry about). 
+	
+	The goal of adaptive sampling is to eliminate this trade off by adaptively sampling until we are pretty sure the samples have converged. At a high level, this is what I implemented: I do `samplesPerBatch` samples in a batch. I then compute $I=1.96*\rho/\sqrt{n}$ and compare $I <= .05 \mu$, where n is the number of samples, $\rho$ is the sqrt of the sample variance, and $\mu$ is the sample mean. This is basically checking if we have converged such that a 95% confidence interval is $\mu \plusminus I$ and that that interval is within our tolerance. Once we are within this interval, we exit early from sampling. 
+
+	This allows us to exit early from sampling when we converge quickly, saving computation, while still allowing for high numbers of samples in complex areas.
 </p>
 <br>
 
