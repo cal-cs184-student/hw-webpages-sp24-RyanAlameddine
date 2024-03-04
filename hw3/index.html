@@ -65,18 +65,18 @@
 <h2 align="middle">Overview</h2>
 <p>
     In this project, I implemented a path tracing renderer with a variety of optimizations.
-	
+	<br>
 	I started off by implementing the primitive operations required for raytracing. This includes generating camera rays, and functions which find intersections between primitives (like triangles and spheres) and rays. At this point, ray tracing to generate an image was incredibly slow because it required testing intersection of every single ray with every single object. 
-	
+	<br>
 	Next, I implemented the first optimization, the BVH accelleration structure. I constructed a binary tree which partitions the primitives in the scene according to a heuristic I designed. This allows ray-scene intersection tests to be logarithmic in # of objects, not linear. This is because intersection can be calculated by first traversing the tree node bounding boxes which intersect, and only intersecting the ray with the primitives at the leaves.
-
+	<br>
 	Equipped with this optimization, I implementation the foundataions for global illumination. I implemented a simple diffuse bsdf which scatters light uniformly across it's hemisphere. Next, I implemented zero-bounce lighting and direct lighting (which sends rays out from scene intersection points to check if that surface should have lighting). First I implemented hemisphere sampling for the bounces, but this caused a lot of noise with low sample counts because most rays would just bounce into nothingness or a non-emissive object. Next, I implemented importance sampling, which sampled directly from the directions which were more likely to hit lights instead. 
-
+	<br>
 
 	Equipped with these tools, I implemented global illumination which is a combination of everything up to this point. Basically, I generate camera rays and intersect them with the scene. If they hit something, they have a chance to bounce again. This happens recursively until the ray misses or a coin flip fails. Each time, we accumulate light which has been building up according to the reflection equation. The final value contributes a sample to the pixel.
-
+	<br>
 	Finally, I implemented adaptive sampling, which allowed the pixel sample rate to automatically adjust depending on if we thought the pixel had converged. This sped up renders while allowing for high sampling rate at difficult sections of the image.
-
+	<br>
 	In the process of implementing this project, I didn't run into too many issues. The most difficult issues had to do with lighting (images were too bright or too dark in certain sections). By carefully tracing different bounces, I was able to identify that my diffuse BSDF was not correctly normalized, and I was double counting emission on bounces. Other than this, the project went pretty smooth!
 </p>
 <br>
@@ -143,9 +143,9 @@ Compare rendering times on a few scenes with moderately complex geometries with 
 </h3>
 <p>
     My BVH construction algorithm is pretty simple. First, I iterate through each primitive within this node. Using this iteration, I collect two things: 1) I expand the node's bounding box using the primitive's bounding box, and 2) I add the centroid of the primitive to an accumulator. Once iteration is complete, I divide the accumulator by the number of elements visited to obtain the average of all the centroids. Next, there are two cases:
-
+	<br>
 	If the primitive count is less than or equal to max_leaf_size, then we are done.
-
+	<br>
 	Otherwise, we want to split the node again. To do this, I use the following heuristic. I consider the bounding box of this node. Depending on if the width(x), height(y), or length(z) is biggest, I select a normal vector for the splitting plane to be (1, 0, 0), (0, 1, 0), or (0, 0, 1) respectively. Thus, the splitting plane is defined by this vector and the average centroid computed above. I then iterate through each primitive, adding it to a collection of left and right elements depending on whether $(p - c)\cdot n < 0$ (p is the primitive's centroid, c is the average centroid, and n is the normal vector of the split plane).
 </p>
 
@@ -198,15 +198,15 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
 </h3>
 <p>
 	In each of these functions, I attempt to estimate the direct lighting on a particular point by taking a set of samples. This point is the scene intersection of a camera ray.
-
+	<br>
     Hemisphere:
 	I sample a set of directions in a hemisphere around the point. For each sample, I cast a ray from the intersection point in the sampled direction. If it hits an emissive entity (with emission L), I calculate it's contribution to L_out using the reflection equation: $L * bsdf(w_out, w_in) * dot(n, win) * 2*pi$. Note that n is the surface normal and win is w_in in world space. The $2*pi$ term is division by the pdf $1/2pi$, which is required for the monte carlo estimator to be unbiased ($1/2pi$ is the pdf).
-
+	<br>
 	I then return the average of all those samples, plus any emission from the surface itself.
-
+	<br>
 	Importance:
 	For each light in the scene, I sample $ns_area_light$ samples times (or once if it's a point light). I sample from the light itself. I then cast a ray from the hit point to the sampled light direction. If it hits anything, I ignore this sample. If it doesn't, I add the light's contribution to the reflection using the reflection equation $L * bsdf(w_out, w_in) * dot(n, win) /pdf$. Note that this time the pdf is simply divided by directly because pdf is set by the light sampler.
-
+	<br>
 	The samples are combined by averaging.
 	I return the average of all those samples, plus any emission from the surface itself.
 </p>
@@ -454,9 +454,9 @@ Pick one scene and render it with at least 2048 samples per pixel. Show a good s
 </h3>
 <p>
     Before adaptive sampling, when generating an image with the pathtracing algorithm, I would generate a uniform number of samples per pixel. I would run the light bouncing algorithm for each sample, and average the result. However, there is an unfortunate trade off here. For some samples in easy parts of the image, the samples converge to the true mean very quickly, so the rest of the samples taken are unneccessarily wasting computation time. However, for complex areas of the scene, we might not have enough samples to eliminate most noise. This means we have to choose between wasting computation time and noise (defined by the section of the image which has the most noise we have to worry about). 
-	
+	<br>
 	The goal of adaptive sampling is to eliminate this trade off by adaptively sampling until we are pretty sure the samples have converged. At a high level, this is what I implemented: I do `samplesPerBatch` samples in a batch. I then compute $I=1.96*\rho/\sqrt{n}$ and compare $I <= .05 \mu$, where n is the number of samples, $\rho$ is the sqrt of the sample variance, and $\mu$ is the sample mean. This is basically checking if we have converged such that a 95% confidence interval is $\mu \plusminus I$ and that that interval is within our tolerance. Once we are within this interval, we exit early from sampling. 
-
+	<br>
 	This allows us to exit early from sampling when we converge quickly, saving computation, while still allowing for high numbers of samples in complex areas.
 </p>
 <br>
