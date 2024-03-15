@@ -57,5 +57,146 @@
 	</table>
   </div>
   <br>
+
+<br><br>
+
+<h3>Describe the effects of changing the spring constant ks; how does the cloth behave from start to rest with a very low ks? A high ks?</h3>
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/5000.png" align="middle" width="400px"/>
+		  <figcaption>High (50000)</figcaption>
+		</td>
+		<td>
+		  <img src="images/500.png" align="middle" width="400px"/>
+		  <figcaption>Low (500)</figcaption>
+		</td>
+	  </tr>
+	</table>
+</div>
+<p>The spring constant ks affects how "strong" the spring is. When ks is higher, the springs are much more likely to stay very close to their resting positions. When ks is lower, it allows a lot more leeway, stretching further than the high ks version. You can see this clearly in the above images. In the high ks version, the top edge of the cloth does not sag nearly as far as the low ks version.</p>
+<h3>What about for density?</h3>
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/150.png" align="middle" width="400px"/>
+		  <figcaption>High (150)</figcaption>
+		</td>
+		<td>
+		  <img src="images/1.5.png" align="middle" width="400px"/>
+		  <figcaption>Low (1.5)</figcaption>
+		</td>
+	  </tr>
+	</table>
+</div>
+<p>As we know, increasing the density increases the point mass' masses. Because of this, it increases the impact of the force of gravity on each point mass. Thus, when density is high, we can see that the cloth sags a lot, including at the bottom edge. However, when the density is low, most of the behavior of the cloth is due to the spring forces, so we see a much flatter cloth plane.</p>
+<h3>What about for damping?</h3>
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/1.png" align="middle" width="400px"/>
+		  <figcaption>High (1%)</figcaption>
+		</td>
+		<td>
+		  <img src="images/.02.png" align="middle" width="400px"/>
+		  <figcaption>Low (.02%)</figcaption>
+		</td>
+	  </tr>
+	</table>
+</div>
+<p>When the damping is high, the cloth falls very slowly and smoothly with very little oscillation. When the damping is very low, the cloth falls quickly and swings back and forth for a long time (shown in the image above).</p>
+
+<h3>Show us a screenshot of your shaded cloth from scene/pinned4.json in its final resting state! If you choose to use different parameters than the default ones, please list them.</h3>
+
+<img src="images/pinned4.png" align="middle" width="400px"/>
+<img src="images/pinned4shaded.png" align="middle" width="400px"/>
+
+<h3>Show us screenshots of your shaded cloth from scene/sphere.json in its final resting state on the sphere using the default ks = 5000 as well as with ks = 500 and ks = 50000. Describe the differences in the results.</h3>
+
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/s5000.png" align="middle" width="400px"/>
+		  <figcaption>Default (5000)</figcaption>
+		</td>
+		<td>
+		  <img src="images/s500.png" align="middle" width="400px"/>
+		  <figcaption>Low (500)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/s50000.png" align="middle" width="400px"/>
+		  <figcaption>High (50000)</figcaption>
+		</td>
+	  </tr>
+	</table>
+</div>
+
+<p>As the spring constant increases, this increases the "strength" of the springs in the cloth. Thus, the high ks image shows fewer folds and much less droop over the sphere (it more closely resembles the original structure of the cloth). As the spring constant decreases, this decreases the strength of the springs in the cloth. Thus, you can see that in the low ks image, there are many folds and lots of droop over the sphere.</p>
+
+<h3>
+Show us a screenshot of your shaded cloth lying peacefully at rest on the plane. If you haven't by now, feel free to express your colorful creativity with the cloth! (You will need to complete the shaders portion first to show custom colors.)
+</h3>
+
+<img src="images/plane.png" align="middle" width="400px"/>
+<h3>Show us at least 3 screenshots that document how your cloth falls and folds on itself, starting with an early, initial self-collision and ending with the cloth at a more restful state (even if it is still slightly bouncy on the ground).</h3>
+
+
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/falling.png" align="middle" width="400px"/>
+		  <figcaption>Falling</figcaption>
+		</td>
+		<td>
+		  <img src="images/fallen.png" align="middle" width="400px"/>
+		  <figcaption>Fallen</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/rest.png" align="middle" width="400px"/>
+		  <figcaption>Rest</figcaption>
+		</td>
+	  </tr>
+	</table>
+</div>
+
+
+<h3>Vary the density as well as ks and describe with words and screenshots how they affect the behavior of the cloth as it falls on itself.</h3>
+
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/highlow.png" align="middle" width="400px"/>
+		  <figcaption>High density (30), low ks (2500)</figcaption>
+		</td>
+		<td>
+		  <img src="images/highhigh.png" align="middle" width="400px"/>
+		  <figcaption>High density (30), high ks (10000)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/lowlow.png" align="middle" width="400px"/>
+		  <figcaption>Low density (7.5), low ks (2500)</figcaption>
+		</td>
+		<td>
+			<img src="images/lowhigh.png" align="middle" width="400px"/>
+			<figcaption>Low density (7.5), high ks (10000)</figcaption>
+		  </td>
+	  </tr>
+	</table>
+</div>
+
+<p>With high density but low ks, there are many fine folds and creases in the cloth as it self collides. With high ks but low density, the folds are very wide and smooth. When density and ks were both high or both low, there wasn't much noticeable difference.</p>
+
 </body>
 </html>
