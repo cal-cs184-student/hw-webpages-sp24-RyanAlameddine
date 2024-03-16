@@ -23,16 +23,19 @@
 
 <body>
 
-<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2017</h1>
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2024</h1>
 <h1 align="middle">Project 4: Cloth Simulator</h1>
 <h2 align="middle">Ryan Alameddine</h2>
+
+
+<h2 align="middle">Website URL: <a href="https://cal-cs184-student.github.io/hw-webpages-sp24-RyanAlameddine/hw4/index.html">https://cal-cs184-student.github.io/hw-webpages-sp24-RyanAlameddine/hw4/index.html</a></h2>
 
 <br><br>
 
 <div>
 
 <h2 align="middle">Overview</h2>
-<p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project. \TODO</p>
+<p>In this project, I implemented a cloth simulation. I started out by building a cloth structure using a mesh of point masses and springs. These were arranged using a variety of links including structural, shearing, and bending springs to ensure the cloth maintains it's structure. Next, I allowed the points to move over time using Verlet integration, constraining the spring lengths to ensure stability of the system. Next, I implemented collisions, from the cloth elements to other scene objects in addition to self collisions. Finally, I implemented a variety of shaders for the cloth renders!</p>
 
 <h2 align="middle">Part I: Masses and springs</h2>
 
@@ -197,6 +200,132 @@ Show us a screenshot of your shaded cloth lying peacefully at rest on the plane.
 </div>
 
 <p>With high density but low ks, there are many fine folds and creases in the cloth as it self collides. With high ks but low density, the folds are very wide and smooth. When density and ks were both high or both low, there wasn't much noticeable difference.</p>
+
+<h3>Explain in your own words what is a shader program and how vertex and fragment shaders work together to create lighting and material effects.
+</h3>
+
+<p>Shader programs are graphics programs designed to represent components of highly paralellizable programs run on GPUs. In the standard pipeline used in this class, we consider vertex and fragment shaders. 
+	</p><p>
+	Vertex shaders run on each vertex in the scene. These shaders take in geometric information such as vertex positions, normals, uv coordinates, and have access to uniforms like texture information.The vertex shader can perform computations on these details before transfering them over to the fragment shader. For example, the displacement vertex shader displaces verticies along their normal vectors according to texture information. 
+</p><p>
+	Fragment shaders transform samples of this updated geometry into color samples (fragments). In particular, for each fragment point, they take in values outputted by the vertex shader (interpolated using barycentric coordinates) and output a color. For example, in the diffuse fragment shader, I calculate the outputted color using the light intensity and angle difference with the normal vector. </p>
+
+<h3>
+Explain the Blinn-Phong shading model in your own words. Show a screenshot of your Blinn-Phong shader outputting only the ambient component, a screen shot only outputting the diffuse component, a screen shot only outputting the specular component, and one using the entire Blinn-Phong model.
+</h3>
+
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/ambient.png" align="middle" width="400px"/>
+		  <figcaption>Ambient only</figcaption>
+		</td>
+		<td>
+		  <img src="images/diffuse.png" align="middle" width="400px"/>
+		  <figcaption>Diffuse only</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/spec.png" align="middle" width="400px"/>
+		  <figcaption>Specular only</figcaption>
+		</td>
+		<td>
+			<img src="images/all.png" align="middle" width="400px"/>
+			<figcaption>Full phong</figcaption>
+		  </td>
+	  </tr>
+	</table>
+</div>
+
+<p>The Blinn-Phong shading model has a couple key components. First, it has an ambient component, which applies a flat color uniformly across the surface. Next, is a diffuse component, which is simply a normal diffuse shader (reflects light spread out evenly across the hemisphere around the normal vector). Finally, there is a specular component, which reflects light spread a bit along the reflection axis. The final color output is a weighted sum of these three components.</p>
+
+<h3>
+Show a screenshot of your texture mapping shader using your own custom texture by modifying the textures in /textures/.
+</h3>
+
+<img src="images/textures.png" align="middle" width="400px"/>
+
+<h3>
+Show a screenshot of bump mapping on the cloth and on the sphere. Show a screenshot of displacement mapping on the sphere. Use the same texture for both renders. You can either provide your own texture or use one of the ones in the textures directory, BUT choose one that's not the default texture_2.png. Compare the two approaches and resulting renders in your own words. 
+</h3>
+
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/bumpcloth.png" align="middle" width="400px"/>
+		  <figcaption>Bump mapping</figcaption>
+		</td>
+		<td>
+		  <img src="images/bumpsphere.png" align="middle" width="400px"/>
+		  <figcaption>Bump mapping</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/displacementsphere.png" align="middle" width="400px"/>
+		  <figcaption>Displacement</figcaption>
+		</td>
+	  </tr>
+	</table>
+</div>
+
+<p>With bump mapping, the geometry of the objects are not changed by the shader. However, the lighting reflection is calculated with a virtual normal vector corresponding to information from the bump map, thus the surface appears rough and textured. With displacement mapping, the geometry of the sphere itself is altered to align with the bump map in addition to the normal modification. You can see this by looking at the edges of the sphere in both images. In the displacement map case, the sphere geometric is pushed in or out according to the texture.</p>
+
+<h3>Compare how your the two shaders react to the sphere by changing the sphere mesh's coarseness by using -o 16 -a 16 and then -o 128 -a 128.
+</h3>
+
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/bumpsphere16.png" align="middle" width="400px"/>
+		  <figcaption>Bump mapping (16,16 resolution)</figcaption>
+		</td>
+		<td>
+		  <img src="images/displacementsphere16.png" align="middle" width="400px"/>
+		  <figcaption>Displacement (16,16 resolution)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/bumpsphere128.png" align="middle" width="400px"/>
+		  <figcaption>Bump mapping (128,128 resolution)</figcaption>
+		</td>
+		<td>
+			<img src="images/displacementsphere128.png" align="middle" width="400px"/>
+			<figcaption>Displacement (128,128 resolution)</figcaption>
+		  </td>
+	  </tr>
+	</table>
+</div>
+
+<p>Because the bump mapping does not affect the geometry, the bump mapping affects the mesh in exactly the same way with both sphere resolutions. However, the displacement shader physically alters geometry. Thus, a higher resolution sphere will more accurately match the underlying displacement map. Thus, you can see that the low resolution sphere is very sharply bumpy, not fitting the underlying texture very well. Alternatively, the high resolution sphere very smoothly displaces along the texture.</p>
+
+
+<h3>
+Show a screenshot of your mirror shader on the cloth and on the sphere.</h3>
+
+<div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/mirrorsphere.png" align="middle" width="400px"/>
+		  <figcaption>Mirror sphere</figcaption>
+		</td>
+		<td>
+		  <img src="images/mirrorcloth.png" align="middle" width="400px"/>
+		  <figcaption>Mirror cloth</figcaption>
+		</td>
+	  </tr>
+	</table>
+</div>
+
+<h3>Explain what you did in your custom shader, if you made one.</h3>
+<img src="images/custom.png" align="middle" width="400px"/>
+<p>For my custom shader, I combined all 5 shaders into one. For the vertex shader, I used my displacement vertex shader to displace the verticies according to the underlying bump/displacement texture. In the fragment shader, I used my bump fragment shader to provide sub-geometry texture. Additionally, I multiplied the ambient and diffuse components of the phong shading with the result of a texture sample. Finally, I added another linear term to the sum which was pure mirror reflection (in addition to the phong specular). This combines into the image above!</p>
 
 </body>
 </html>
